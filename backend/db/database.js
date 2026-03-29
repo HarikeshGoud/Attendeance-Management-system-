@@ -1,15 +1,14 @@
 'use strict';
-const { DatabaseSync } = require('node:sqlite');
+const Database = require('better-sqlite3');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const dbPath = path.resolve(__dirname, 'ams.db');
-const db = new DatabaseSync(dbPath);
+const db = new Database(dbPath);
 
-db.exec(`PRAGMA journal_mode = WAL`);
-db.exec(`PRAGMA foreign_keys = ON`);
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
-// ── SCHEMA ────────────────────────────────────────────────────────────────────
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,

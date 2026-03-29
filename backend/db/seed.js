@@ -149,7 +149,7 @@ const patterns = [
 const insertSession = db.prepare(`INSERT OR IGNORE INTO attendance_sessions (subject_id, class_id, teacher_id, date) VALUES (?, ?, ?, ?)`);
 const insertRecord  = db.prepare(`INSERT OR IGNORE INTO attendance_records (session_id, student_id, status) VALUES (?, ?, ?)`);
 
-db.exec('BEGIN');
+db.exec('BEGIN TRANSACTION');
 subjectList.forEach(subId => {
   for (let i = 0; i < 20; i++) {
     const d = new Date();
@@ -164,7 +164,7 @@ subjectList.forEach(subId => {
     });
   }
 });
-db.exec('COMMIT');
+db.exec('COMMIT TRANSACTION');
 
 console.log('✅ Database seeded successfully!\n');
 console.log('📋 LOGIN CREDENTIALS\n');

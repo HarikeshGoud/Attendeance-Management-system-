@@ -79,7 +79,7 @@ exports.createUser = (req, res) => {
   const hashed = bcrypt.hashSync(password, 10);
 
   let userId;
-  db.exec('BEGIN');
+  db.exec('BEGIN TRANSACTION');
   try {
     const { lastInsertRowid } = db.prepare(
       `INSERT INTO users (identifier, password, role, name, email, phone) VALUES (?, ?, ?, ?, ?, ?)`
@@ -93,9 +93,9 @@ exports.createUser = (req, res) => {
       db.prepare(`INSERT INTO teachers (user_id, staff_id, department_id, designation) VALUES (?, ?, ?, ?)`)
         .run(userId, extra.staff_id || identifier, extra.department_id, extra.designation || 'Assistant Professor');
     }
-    db.exec('COMMIT');
+    db.exec('COMMIT TRANSACTION');
   } catch (e) {
-    db.exec('ROLLBACK');
+    db.exec('ROLLBACK TRANSACTION');
     throw e;
   }
   res.status(201).json({ message: 'User created', user_id: userId });

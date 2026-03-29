@@ -136,14 +136,14 @@ exports.createSession = (req, res) => {
   `);
 
   let sessionId;
-  db.exec('BEGIN');
+  db.exec('BEGIN TRANSACTION');
   try {
     const { lastInsertRowid } = insertSession.run(subject_id, class_id, teacher.id, date);
     sessionId = lastInsertRowid;
     records.forEach(r => insertRecord.run(sessionId, r.student_id, r.status || 'absent'));
-    db.exec('COMMIT');
+    db.exec('COMMIT TRANSACTION');
   } catch (e) {
-    db.exec('ROLLBACK');
+    db.exec('ROLLBACK TRANSACTION');
     throw e;
   }
   res.status(201).json({ message: 'Attendance saved', session_id: sessionId });
@@ -166,12 +166,12 @@ exports.updateSession = (req, res) => {
     ON CONFLICT(session_id, student_id) DO UPDATE SET status=excluded.status, marked_at=datetime('now')
   `);
 
-  db.exec('BEGIN');
+  db.exec('BEGIN TRANSACTION');
   try {
     records.forEach(r => upsert.run(sessionId, r.student_id, r.status));
-    db.exec('COMMIT');
+    db.exec('COMMIT TRANSACTION');
   } catch (e) {
-    db.exec('ROLLBACK');
+    db.exec('ROLLBACK TRANSACTION');
     throw e;
   }
   res.json({ message: 'Attendance updated' });
