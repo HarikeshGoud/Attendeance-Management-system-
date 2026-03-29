@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --experimental-sqlite server.js",
     "dev": "node --experimental-sqlite --watch server.js",
-    "seed": "node --experimental-sqlite db/seed.js"
+    "build": "node --experimental-sqlite db/seed.js",
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
