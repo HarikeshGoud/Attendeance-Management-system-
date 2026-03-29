@@ -1,5 +1,7 @@
 // AMS API Client — shared across all pages
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api' 
+  : 'https://ams-backend.onrender.com/api';
 
 const AMS = {
   // ── Token helpers ──────────────────────────────────────────────────────────
