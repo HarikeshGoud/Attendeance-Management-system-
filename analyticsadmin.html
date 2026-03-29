@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | System Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family:'Plus Jakarta Sans',sans-serif; background-color:#0f172a; overflow:hidden; }
+        .mesh-gradient { position:fixed; inset:0; z-index:-2;
+            background-image:radial-gradient(at 0% 0%,#1e293b 0,transparent 50%),
+            radial-gradient(at 100% 0%,#312e81 0,transparent 50%),
+            radial-gradient(at 50% 100%,#020617 0,transparent 50%); }
+        .glass-card { background:rgba(255,255,255,0.97); backdrop-filter:blur(12px);
+            border:1px solid rgba(255,255,255,0.3); box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); }
+        #sidebar { transition:width 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .sidebar-collapsed { width:85px!important; }
+        .sidebar-collapsed .nav-text,.sidebar-collapsed .admin-text { display:none; }
+        .sidebar-collapsed .nav-item { justify-content:center; padding:0.75rem 0; }
+        .main-viewport::-webkit-scrollbar { width:5px; }
+        .main-viewport::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:10px; }
+        .bar-fill { transition: height 1.2s cubic-bezier(0.4,0,0.2,1); }
+        .progress-bar { transition: width 1s ease; }
+        .ring-chart { transform: rotate(-90deg); }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex">
+<div class="mesh-gradient"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="w-72 hidden lg:flex flex-col border-r border-white/10 h-screen sticky top-0 p-6 z-50 bg-slate-900/20 backdrop-blur-md">
+    <div onclick="toggleSidebar()" class="flex items-center gap-3 mb-12 text-white cursor-pointer group">
+        <div class="w-10 h-10 bg-slate-800 rounded-xl flex-shrink-0 flex items-center justify-center border border-slate-700 group-hover:border-indigo-400 transition-colors">
+            <i class="fa-solid fa-shield-halved text-lg"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight admin-text">AMS <span class="font-light opacity-70">Admin</span></h1>
+    </div>
+    <nav class="space-y-1 flex-1">
+        <a href="admin portal.html" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-chart-pie w-5 text-center"></i><span class="nav-text font-semibold">Dashboard</span>
+        </a>
+        <a href="manageuser.html" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-user-group w-5 text-center"></i><span class="nav-text font-semibold">Manage Users</span>
+        </a>
+        <a href="attendancepageadmin.html" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-calendar-check w-5 text-center"></i><span class="nav-text font-semibold">Attendance</span>
+        </a>
+        <a href="analyticsadmin.html" class="nav-item flex items-center gap-4 px-4 py-3 text-indigo-400 bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-chart-line w-5 text-center"></i><span class="nav-text font-bold">Analytics</span>
+        </a>
+    </nav>
+    <div class="pt-6 border-t border-white/10">
+        <button onclick="AMS.logout()" class="nav-item w-full flex items-center gap-4 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-2xl font-bold transition-all">
+            <i class="fa-solid fa-power-off w-5 text-center"></i><span class="nav-text">Logout</span>
+        </button>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header class="h-20 flex items-center justify-between px-8 text-white relative z-50 flex-shrink-0">
+        <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Insights Engine</p>
+            <h2 class="text-xl font-bold">System Analytics</h2>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="exportAnalytics()" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all border border-white/10 flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Export Report
+            </button>
+        </div>
+    </header>
+
+    <main class="main-viewport flex-1 overflow-y-auto p-4 md:p-8 pt-2">
+        <div class="max-w-7xl mx-auto space-y-6">
+
+            <!-- TOP STAT CARDS -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card rounded-3xl p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-users"></i></div>
+                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Total Students</p><p class="text-2xl font-black text-slate-900" id="kpi-students">--</p></div>
+                </div>
+                <div class="glass-card rounded-3xl p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-circle-check"></i></div>
+                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Avg Attendance</p><p class="text-2xl font-black text-emerald-600" id="kpi-avg">--%</p></div>
+                </div>
+                <div class="glass-card rounded-3xl p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-red-100 text-red-500 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div><p class="text-[10px] font-black text-slate-400 uppercase">At Risk</p><p class="text-2xl font-black text-red-500" id="kpi-atrisk">--</p></div>
+                </div>
+                <div class="glass-card rounded-3xl p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-clipboard-check"></i></div>
+                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Total Sessions</p><p class="text-2xl font-black text-slate-900" id="kpi-sessions">--</p></div>
+                </div>
+            </div>
+
+            <!-- ROW 2: Monthly Bar Chart + Donut -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Monthly Attendance Bar Chart -->
+                <div class="lg:col-span-2 glass-card rounded-[2.5rem] p-8">
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Monthly Attendance Trend</h3>
+                            <p class="text-sm text-slate-500 font-medium">Attendance % per month across all subjects</p>
+                        </div>
+                        <div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-indigo-500 inline-block"></span> Present %</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-200 inline-block"></span> Below 75%</span>
+                        </div>
+                    </div>
+                    <!-- Bar Chart -->
+                    <div class="flex items-end justify-between gap-3 h-44" id="bar-chart">
+                        <div class="text-center text-slate-400 text-sm w-full">Loading chart...</div>
+                    </div>
+                    <!-- X-axis line -->
+                    <div class="border-t-2 border-slate-100 mt-2"></div>
+                    <p class="text-center mt-4 text-slate-400 text-xs font-medium" id="chart-summary">Loading...</p>
+                </div>
+
+                <!-- Donut / Ring Chart -->
+                <div class="glass-card rounded-[2.5rem] p-8 flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-black text-slate-900 mb-1 self-start">Overall Health</h3>
+                    <p class="text-xs text-slate-500 mb-6 self-start">Present vs Absent ratio</p>
+                    <div class="relative w-40 h-40 mb-6">
+                        <svg viewBox="0 0 100 100" class="w-full h-full ring-chart">
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#6366f1" stroke-width="12"
+                                stroke-dasharray="251.2" id="donut-present" stroke-dashoffset="251.2"
+                                stroke-linecap="round"/>
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="12"
+                                stroke-dasharray="251.2" id="donut-absent" stroke-dashoffset="251.2"
+                                stroke-linecap="round" opacity="0.4"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-3xl font-black text-slate-900" id="donut-pct">--%</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Present</span>
+                        </div>
+                    </div>
+                    <div class="w-full space-y-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="flex items-center gap-2 font-bold text-slate-700"><span class="w-3 h-3 rounded-full bg-indigo-500 inline-block"></span>Present</span>
+                            <span class="font-black text-indigo-600" id="donut-present-count">--</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="flex items-center gap-2 font-bold text-slate-700"><span class="w-3 h-3 rounded-full bg-red-400 inline-block"></span>Absent</span>
+                            <span class="font-black text-red-500" id="donut-absent-count">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 3: Subject-wise bars + At-Risk table -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Subject-wise Attendance -->
+                <div class="glass-card rounded-[2.5rem] p-8">
+                    <h3 class="text-lg font-black text-slate-900 mb-6">Subject-wise Attendance</h3>
+                    <div class="space-y-5" id="subject-bars">
+                        <p class="text-slate-400 text-sm">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- At-Risk Students Table -->
+                <div class="glass-card rounded-[2.5rem] p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">At-Risk Students</h3>
+                        <span class="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black uppercase" id="atrisk-badge">0 Students</span>
+                    </div>
+                    <div class="space-y-3 max-h-72 overflow-y-auto" id="atrisk-list">
+                        <p class="text-slate-400 text-sm">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 4: Department Performance -->
+            <div class="glass-card rounded-[2.5rem] p-8">
+                <h3 class="text-lg font-black text-slate-900 mb-6">Department Performance</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="dept-cards">
+                    <p class="text-slate-400 text-sm col-span-4">Loading...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="api.js"></script>
+<script>
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-collapsed'); }
+
+let analyticsData = null;
+
+async function loadAnalytics() {
+    if (!AMS.requireAuth('admin')) return;
+    try {
+        const [data, dash] = await Promise.all([AMS.adminAnalytics(), AMS.adminDashboard()]);
+        analyticsData = data;
+
+        // KPI Cards
+        document.getElementById('kpi-students').textContent  = dash.stats.totalStudents;
+        document.getElementById('kpi-avg').textContent       = dash.stats.avgAttendance + '%';
+        document.getElementById('kpi-atrisk').textContent    = data.at_risk.length;
+        document.getElementById('kpi-sessions').textContent  = dash.stats.totalSessions;
+
+        renderBarChart(data.monthly_trend);
+        renderDonut(data);
+        renderSubjectBars(data);
+        renderAtRisk(data.at_risk);
+        renderDeptCards(data.dept_stats);
+
+    } catch(e) { console.error('Analytics error:', e); }
+}
+
+function renderBarChart(trend) {
+    const container = document.getElementById('bar-chart');
+    if (!trend || !trend.length) {
+        container.innerHTML = '<p class="text-slate-400 text-sm w-full text-center">No monthly data available yet.</p>';
+        document.getElementById('chart-summary').textContent = 'No data available.';
+        return;
+    }
+
+    // Sort oldest to newest
+    const sorted = [...trend].sort((a,b) => a.month.localeCompare(b.month));
+    const maxPct = Math.max(...sorted.map(t => t.percentage || 0), 1);
+    const monthNames = { '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun','07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec' };
+
+    container.innerHTML = sorted.map(t => {
+        const pct    = t.percentage || 0;
+        const height = Math.round((pct / 100) * 100);
+        const color  = pct >= 75 ? '#6366f1' : '#fca5a5';
+        const textColor = pct >= 75 ? 'text-indigo-600' : 'text-red-500';
+        const mon    = monthNames[t.month.slice(5)] || t.month.slice(5);
+        return `
+        <div class="flex flex-col items-center flex-1 gap-1 group cursor-default" title="${mon}: ${pct}%">
+            <span class="text-[10px] font-black ${textColor} opacity-0 group-hover:opacity-100 transition-opacity">${pct}%</span>
+            <div class="w-full rounded-t-xl relative overflow-hidden" style="height:160px; background:#f1f5f9;">
+                <div class="bar-fill absolute bottom-0 w-full rounded-t-xl" style="height:0%; background:${color};" data-height="${height}%"></div>
+            </div>
+            <span class="text-[10px] font-black text-slate-500 uppercase">${mon}</span>
+        </div>`;
+    }).join('');
+
+    // Animate bars after render
+    setTimeout(() => {
+        container.querySelectorAll('.bar-fill').forEach(bar => {
+            bar.style.height = bar.dataset.height;
+        });
+    }, 100);
+
+    const avg = Math.round(sorted.reduce((s,t) => s + (t.percentage||0), 0) / sorted.length);
+    document.getElementById('chart-summary').textContent = `Average attendance over ${sorted.length} month(s): ${avg}% — ${avg >= 75 ? '✅ Above target' : '⚠️ Below 75% target'}`;
+}
+
+function renderDonut(data) {
+    // Calculate from at_risk and total
+    let totalPresent = 0, totalRecords = 0;
+    data.dept_stats.forEach(d => {
+        if (d.avg_attendance && d.students) {
+            totalPresent += (d.avg_attendance / 100) * d.students;
+            totalRecords += d.students;
+        }
+    });
+
+    // Use monthly trend for more accurate totals
+    if (data.monthly_trend && data.monthly_trend.length) {
+        const last = data.monthly_trend[data.monthly_trend.length - 1];
+        totalPresent = last.present || 0;
+        totalRecords = last.total  || 0;
+    }
+
+    const pct = totalRecords > 0 ? Math.round(totalPresent / totalRecords * 100) : 0;
+    const circumference = 251.2;
+    const presentOffset = circumference - (pct / 100) * circumference;
+    const absentOffset  = circumference - ((100 - pct) / 100) * circumference;
+
+    document.getElementById('donut-pct').textContent           = pct + '%';
+    document.getElementById('donut-present-count').textContent = totalPresent.toLocaleString() + ' records';
+    document.getElementById('donut-absent-count').textContent  = (totalRecords - totalPresent).toLocaleString() + ' records';
+
+    setTimeout(() => {
+        document.getElementById('donut-present').style.strokeDashoffset = presentOffset;
+    }, 200);
+}
+
+function renderSubjectBars(data) {
+    const container = document.getElementById('subject-bars');
+    // Build subject stats from monthly trend + dept data
+    // Use dept_stats as proxy since we have subject data from analytics
+    if (!data.dept_stats || !data.dept_stats.length) {
+        container.innerHTML = '<p class="text-slate-400 text-sm">No subject data available.</p>';
+        return;
+    }
+
+    // We'll use dept stats as subject-level proxies with color coding
+    const colors = ['indigo','emerald','blue','purple','orange','teal'];
+    container.innerHTML = data.dept_stats.map((d, i) => {
+        const pct   = d.avg_attendance || 0;
+        const color = pct >= 75 ? colors[i % colors.length] : 'red';
+        return `
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-${color}-500 inline-block"></span>
+                    <span class="font-bold text-slate-700 text-sm">${d.name}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-slate-400">${d.students} students</span>
+                    <span class="font-black text-sm ${pct >= 75 ? 'text-'+color+'-600' : 'text-red-500'}">${pct}%</span>
+                </div>
+            </div>
+            <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="progress-bar h-full rounded-full bg-${color}-500" style="width:0%" data-width="${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    setTimeout(() => {
+        container.querySelectorAll('.progress-bar').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+        });
+    }, 150);
+}
+
+function renderAtRisk(atRisk) {
+    document.getElementById('atrisk-badge').textContent = atRisk.length + ' Student' + (atRisk.length !== 1 ? 's' : '');
+    const container = document.getElementById('atrisk-list');
+    if (!atRisk.length) {
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-8 text-center">
+                <div class="w-14 h-14 bg-emerald-100 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl mb-3">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <p class="font-bold text-slate-700">All students above 75%</p>
+                <p class="text-xs text-slate-400 mt-1">No at-risk students found</p>
+            </div>`;
+        return;
+    }
+
+    const colors = ['blue','purple','teal','orange','pink','indigo'];
+    container.innerHTML = atRisk.map((s, i) => {
+        const initials = s.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+        const pct = s.percentage || 0;
+        const urgency = pct < 50 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+        return `
+        <div class="flex items-center justify-between p-3 rounded-2xl border border-red-100 bg-red-50/50 hover:bg-red-50 transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-${colors[i%colors.length]}-100 text-${colors[i%colors.length]}-700 flex items-center justify-center font-bold text-xs flex-shrink-0">${initials}</div>
+                <div>
+                    <p class="font-bold text-slate-800 text-sm leading-tight">${s.name}</p>
+                    <p class="text-[10px] text-slate-400 font-bold">${s.roll_no}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="px-2 py-1 rounded-lg text-[10px] font-black ${urgency}">${pct}%</span>
+                <p class="text-[9px] text-slate-400 mt-1">${s.present}/${s.total} classes</p>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderDeptCards(depts) {
+    const container = document.getElementById('dept-cards');
+    if (!depts || !depts.length) {
+        container.innerHTML = '<p class="text-slate-400 text-sm col-span-4">No department data.</p>';
+        return;
+    }
+    const icons = { CSE:'fa-laptop-code', ME:'fa-gear', BS:'fa-briefcase', ECE:'fa-microchip' };
+    const colors = ['indigo','emerald','blue','purple','orange','teal'];
+    container.innerHTML = depts.map((d, i) => {
+        const pct   = d.avg_attendance || 0;
+        const color = pct >= 75 ? colors[i % colors.length] : 'red';
+        const icon  = icons[d.code] || 'fa-building-columns';
+        return `
+        <div class="p-5 rounded-3xl border-2 ${pct >= 75 ? 'border-'+color+'-100 bg-'+color+'-50/50' : 'border-red-100 bg-red-50/50'} hover:scale-[1.02] transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-11 h-11 bg-${color}-100 text-${color}-600 rounded-2xl flex items-center justify-center text-lg">
+                    <i class="fa-solid ${icon}"></i>
+                </div>
+                <span class="text-2xl font-black ${pct >= 75 ? 'text-'+color+'-600' : 'text-red-500'}">${pct}%</span>
+            </div>
+            <p class="font-black text-slate-800 text-sm leading-tight">${d.name}</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">${d.students} students • ${d.code}</p>
+            <div class="mt-3 w-full h-2 bg-white rounded-full overflow-hidden">
+                <div class="h-full rounded-full bg-${color}-500 progress-bar" style="width:0%" data-width="${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    setTimeout(() => {
+        container.querySelectorAll('.progress-bar').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+        });
+    }, 200);
+}
+
+async function exportAnalytics() {
+    try {
+        const data = await AMS.adminAnalytics();
+        let csv = 'Department,Code,Students,Avg Attendance %\n';
+        data.dept_stats.forEach(d => {
+            csv += `${d.name},${d.code},${d.students},${d.avg_attendance||0}\n`;
+        });
+        csv += '\nAt-Risk Students\nName,Roll No,Present,Total,Percentage\n';
+        data.at_risk.forEach(s => {
+            csv += `${s.name},${s.roll_no},${s.present},${s.total},${s.percentage}\n`;
+        });
+        const a = document.createElement('a');
+        a.href = 'data:text/csv,' + encodeURIComponent(csv);
+        a.download = 'analytics_report.csv'; a.click();
+    } catch(e) { alert('Export failed: ' + e.message); }
+}
+
+loadAnalytics();
+</script>
+</body>
+</html>

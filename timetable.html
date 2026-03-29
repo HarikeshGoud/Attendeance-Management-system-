@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Class Timetable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family:'Plus Jakarta Sans',sans-serif; background-color:#020617; color:#f8fafc; margin:0; overflow:hidden; }
+        .mesh-gradient { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-2;
+            background: radial-gradient(circle at 0% 0%,#0f172a 0%,transparent 40%),
+                radial-gradient(circle at 100% 0%,#134e4a 0%,transparent 40%),
+                radial-gradient(circle at 50% 100%,#1e3a8a 0%,transparent 40%); }
+        .glass-card { background:rgba(15,23,42,0.6); backdrop-filter:blur(16px) saturate(180%);
+            border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 32px 0 rgba(0,0,0,0.37); transition:all 0.3s; }
+        .active-day { background:#14b8a6!important; color:#0f172a!important; box-shadow:0 0 20px rgba(20,184,166,0.3); }
+        .no-scrollbar::-webkit-scrollbar { display:none; }
+        .sidebar-nav { width:280px; height:100vh; position:fixed; top:0; left:0; z-index:100; transition:width 0.4s; overflow:hidden; }
+        .sidebar-collapsed { width:80px; }
+        .sidebar-nav .collapsible-text { transition:opacity 0.25s,width 0.4s; opacity:1; white-space:nowrap; overflow:hidden; }
+        .sidebar-collapsed .collapsible-text { opacity:0; width:0; pointer-events:none; }
+        .main-content { margin-left:280px; transition:margin-left 0.4s; }
+        .main-content-collapsed { margin-left:80px; }
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:10px; }
+    </style>
+    <script src="api.js"></script>
+</head>
+<body class="flex flex-row min-h-screen">
+<div class="mesh-gradient"></div>
+
+<aside id="sidebar" class="sidebar-nav bg-black/40 backdrop-blur-2xl border-r border-white/5 flex flex-col py-8">
+    <button onclick="toggleSidebar()" class="flex items-center gap-4 px-5 mb-12 cursor-pointer group w-full text-left focus:outline-none">
+        <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-400 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:rotate-12 transition-transform">
+            <i class="fa-solid fa-graduation-cap text-slate-900 text-xl"></i>
+        </div>
+        <div class="collapsible-text">
+            <h1 class="text-xl font-black tracking-tight text-white leading-none">AMS</h1>
+            <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Student Portal</span>
+        </div>
+    </button>
+    <nav class="space-y-3 flex-1 text-sm px-4">
+        <a href="student dashboard.html" class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+            <i class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold collapsible-text">Dashboard</span>
+        </a>
+        <a href="attendence page.html" class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+            <i class="fa-solid fa-clipboard-user w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold collapsible-text">Attendance</span>
+        </a>
+        <a href="planner.html" class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+            <i class="fa-solid fa-wand-magic-sparkles w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold collapsible-text">Planner</span>
+        </a>
+        <a href="timetable.html" class="flex items-center gap-4 text-white bg-gradient-to-r from-teal-500/20 to-transparent p-3 border-l-2 border-teal-500 rounded-r-xl transition-all">
+            <i class="fa-solid fa-calendar-days w-5 flex-shrink-0 text-center text-teal-400"></i>
+            <span class="font-bold collapsible-text">Schedule</span>
+        </a>
+        <a href="profile.html" class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+            <i class="fa-solid fa-circle-user w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold collapsible-text">Profile</span>
+        </a>
+    </nav>
+    <div class="pt-6 border-t border-white/5 px-4">
+        <button onclick="AMS.logout()" class="w-full text-red-400/70 font-bold flex items-center gap-4 p-3 hover:text-red-400 transition-all">
+            <i class="fa-solid fa-sign-out w-5 flex-shrink-0 text-center"></i>
+            <span class="text-xs uppercase tracking-widest collapsible-text">Logout</span>
+        </button>
+    </div>
+</aside>
+
+<div id="mainContent" class="flex-1 flex flex-col overflow-y-auto h-screen main-content">
+    <header class="p-10 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <nav class="text-[10px] font-bold text-teal-500 uppercase tracking-widest mb-2">4th Semester • CSE Section A</nav>
+            <h2 class="text-4xl font-black text-white">Class Timetable</h2>
+            <p class="text-slate-500 text-sm mt-2" id="week-label">Week Schedule</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="window.print()" class="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-3">
+                <i class="fa-solid fa-print text-teal-500"></i> Print
+            </button>
+            <a href="profile.html" class="glass-card rounded-2xl p-2 px-4 flex items-center gap-4 border border-white/10 hover:border-teal-500/50 transition-all">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-blue-500 flex items-center justify-center font-black text-slate-900 text-sm" id="avatar-tt">--</div>
+            </a>
+        </div>
+    </header>
+
+    <!-- Day Tabs -->
+    <div class="px-10 mb-6">
+        <div class="glass-card rounded-3xl p-2 flex items-center gap-2 overflow-x-auto no-scrollbar max-w-3xl">
+            <button onclick="switchDay(this,'mon')" id="btn-mon" class="flex-1 py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-widest active-day transition-all">Mon</button>
+            <button onclick="switchDay(this,'tue')" id="btn-tue" class="flex-1 py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Tue</button>
+            <button onclick="switchDay(this,'wed')" id="btn-wed" class="flex-1 py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Wed</button>
+            <button onclick="switchDay(this,'thu')" id="btn-thu" class="flex-1 py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Thu</button>
+            <button onclick="switchDay(this,'fri')" id="btn-fri" class="flex-1 py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Fri</button>
+            <button onclick="switchDay(this,'sat')" id="btn-sat" class="flex-1 py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Sat</button>
+        </div>
+    </div>
+
+    <main class="px-10 pb-10 space-y-4" id="timetable-content"></main>
+</div>
+
+<script>
+    if (!AMS.requireAuth('student')) { /* redirected */ }
+    const user = AMS.getUser();
+    if (user) {
+        const initials = user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('avatar-tt').textContent = initials;
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+        document.getElementById('mainContent').classList.toggle('main-content-collapsed');
+    }
+
+    // Realistic timetable data
+    const schedule = {
+        mon: [
+            { time:'09:00–10:00', subject:'Data Structures & Algorithms', code:'CSE-401', room:'Room 402', teacher:'Dr. Rajesh Kumar', type:'lecture', color:'teal' },
+            { time:'10:00–11:00', subject:'Operating Systems',            code:'CSE-402', room:'Room 301', teacher:'Prof. Sarah Smith', type:'lecture', color:'blue' },
+            { time:'11:15–12:15', subject:'Mathematics IV',               code:'MAT-202', room:'Auditorium 1', teacher:'Dr. Pradeep Verma', type:'lecture', color:'purple' },
+            { time:'02:00–04:00', subject:'DSA Lab',                      code:'CSE-401L',room:'Lab CL-01',  teacher:'Dr. Rajesh Kumar', type:'lab',     color:'emerald' },
+        ],
+        tue: [
+            { time:'09:00–10:00', subject:'Compiler Design',              code:'CSE-403', room:'Room 205', teacher:'Dr. Rajesh Kumar', type:'lecture', color:'orange' },
+            { time:'10:00–11:00', subject:'DBMS Architecture',            code:'CSE-404', room:'Room 302', teacher:'Prof. Sarah Smith', type:'lecture', color:'indigo' },
+            { time:'11:15–12:15', subject:'Computer Networks',            code:'CSE-405', room:'Room 401', teacher:'Dr. Pradeep Verma', type:'lecture', color:'cyan' },
+            { time:'02:00–03:00', subject:'Mathematics IV',               code:'MAT-202', room:'Room 101', teacher:'Dr. Pradeep Verma', type:'tutorial', color:'purple' },
+        ],
+        wed: [
+            { time:'09:00–10:00', subject:'Operating Systems',            code:'CSE-402', room:'Room 301', teacher:'Prof. Sarah Smith', type:'lecture', color:'blue' },
+            { time:'10:00–11:00', subject:'Data Structures & Algorithms', code:'CSE-401', room:'Room 402', teacher:'Dr. Rajesh Kumar', type:'lecture', color:'teal' },
+            { time:'02:00–04:00', subject:'OS Lab',                       code:'CSE-402L',room:'Lab CL-02', teacher:'Prof. Sarah Smith', type:'lab',    color:'blue' },
+            { time:'04:00–05:00', subject:'Compiler Design',              code:'CSE-403', room:'Room 205', teacher:'Dr. Rajesh Kumar', type:'lecture', color:'orange' },
+        ],
+        thu: [
+            { time:'09:00–10:00', subject:'DBMS Architecture',            code:'CSE-404', room:'Room 302', teacher:'Prof. Sarah Smith', type:'lecture', color:'indigo' },
+            { time:'10:00–11:00', subject:'Computer Networks',            code:'CSE-405', room:'Room 401', teacher:'Dr. Pradeep Verma', type:'lecture', color:'cyan' },
+            { time:'11:15–12:15', subject:'Data Structures & Algorithms', code:'CSE-401', room:'Room 402', teacher:'Dr. Rajesh Kumar', type:'lecture', color:'teal' },
+            { time:'02:00–04:00', subject:'Networks Lab',                 code:'CSE-405L',room:'Lab CL-03', teacher:'Prof. Meena Iyer', type:'lab',     color:'cyan' },
+        ],
+        fri: [
+            { time:'09:00–10:00', subject:'Mathematics IV',               code:'MAT-202', room:'Auditorium 1', teacher:'Dr. Pradeep Verma', type:'lecture', color:'purple' },
+            { time:'10:00–11:00', subject:'Compiler Design',              code:'CSE-403', room:'Room 205', teacher:'Dr. Rajesh Kumar', type:'lecture', color:'orange' },
+            { time:'11:15–12:15', subject:'DBMS Architecture',            code:'CSE-404', room:'Room 302', teacher:'Prof. Sarah Smith', type:'lecture', color:'indigo' },
+            { time:'02:00–03:00', subject:'Computer Networks',            code:'CSE-405', room:'Room 401', teacher:'Dr. Pradeep Verma', type:'tutorial', color:'cyan' },
+        ],
+        sat: [
+            { time:'09:00–10:00', subject:'Operating Systems',            code:'CSE-402', room:'Room 301', teacher:'Prof. Sarah Smith', type:'lecture', color:'blue' },
+            { time:'10:00–12:00', subject:'DBMS Lab',                     code:'CSE-404L',room:'Lab CL-04', teacher:'Prof. Sarah Smith', type:'lab',    color:'indigo' },
+            { time:'02:00–03:00', subject:'Doubt Session — DSA',          code:'CSE-401', room:'Room 402', teacher:'Dr. Rajesh Kumar', type:'tutorial', color:'teal' },
+        ],
+    };
+
+    const typeLabel = { lecture:'Lecture', lab:'Practical Lab', tutorial:'Tutorial' };
+    const typeIcon  = { lecture:'fa-chalkboard', lab:'fa-flask', tutorial:'fa-pen-nib' };
+
+    function renderDay(day) {
+        const slots = schedule[day] || [];
+        const now = new Date();
+        const todayDay = ['sun','mon','tue','wed','thu','fri','sat'][now.getDay()];
+        const content = document.getElementById('timetable-content');
+
+        if (!slots.length) {
+            content.innerHTML = '<div class="glass-card rounded-3xl p-10 text-center text-slate-500 font-bold">No classes scheduled</div>';
+            return;
+        }
+
+        content.innerHTML = slots.map((s, i) => {
+            const isNow = day === todayDay;
+            return `
+            <div class="glass-card rounded-[2rem] p-6 flex flex-col md:flex-row items-center gap-6 border-l-4 border-${s.color}-500 hover:scale-[1.01] transition-all">
+                <div class="text-center md:text-left min-w-[130px]">
+                    <p class="text-${s.color}-400 font-black text-lg">${s.time.split('–')[0]}</p>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">${s.time.split('–')[1] || ''}</p>
+                    ${isNow ? '<span class="inline-block mt-1 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-black rounded-full uppercase">Today</span>' : ''}
+                </div>
+                <div class="h-12 w-[1px] bg-white/10 hidden md:block"></div>
+                <div class="flex-1">
+                    <h4 class="text-xl font-black text-white">${s.subject}</h4>
+                    <div class="flex flex-wrap items-center gap-3 mt-2">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase bg-white/5 px-2 py-1 rounded">
+                            <i class="fa-solid fa-location-dot mr-1"></i>${s.room}
+                        </span>
+                        <span class="text-[10px] font-bold text-${s.color}-400 uppercase bg-${s.color}-500/10 px-2 py-1 rounded">
+                            <i class="fa-solid ${typeIcon[s.type]} mr-1"></i>${typeLabel[s.type]}
+                        </span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase bg-white/5 px-2 py-1 rounded">${s.code}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-${s.color}-500 to-blue-500 flex items-center justify-center font-bold text-slate-900 text-sm">
+                        ${s.teacher.split(' ').map(n=>n[0]).join('').slice(0,2)}
+                    </div>
+                    <div>
+                        <p class="text-xs font-black text-white leading-none">${s.teacher}</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-1">${typeLabel[s.type]}</p>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    let activeDay = 'mon';
+    function switchDay(btn, day) {
+        document.querySelectorAll('[id^="btn-"]').forEach(b => {
+            b.classList.remove('active-day');
+            b.classList.add('text-slate-500');
+        });
+        btn.classList.add('active-day');
+        btn.classList.remove('text-slate-500');
+        activeDay = day;
+        renderDay(day);
+    }
+
+    // Auto-select today
+    const todayMap = { 0:'mon',1:'mon',2:'tue',3:'wed',4:'thu',5:'fri',6:'sat' };
+    const todayKey = todayMap[new Date().getDay()] || 'mon';
+    const todayBtn = document.getElementById('btn-' + todayKey);
+    if (todayBtn) switchDay(todayBtn, todayKey);
+    else renderDay('mon');
+
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    document.getElementById('week-label').textContent = 'Today is ' + days[new Date().getDay()];
+</script>
+</body>
+</html>

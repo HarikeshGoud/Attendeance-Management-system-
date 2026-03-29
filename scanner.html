@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Biometric Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: radial-gradient(at 0% 0%, #3b82f6 0, transparent 50%),
+                radial-gradient(at 100% 100%, #1e3a8a 0, transparent 50%);
+            background-color: #1e3a8a;
+        }
+
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to bottom, transparent, #3b82f6, transparent);
+            box-shadow: 0 0 15px #3b82f6;
+            animation: scan 3s infinite ease-in-out;
+            z-index: 20;
+        }
+
+        @keyframes scan {
+
+            0%,
+            100% {
+                top: 0%;
+            }
+
+            50% {
+                top: 100%;
+            }
+        }
+
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border: 4px solid rgba(59, 130, 246, 0.3);
+        }
+
+        #page-transition {
+            position: fixed;
+            inset: 0;
+            background: #1e3a8a;
+            z-index: 9999;
+            opacity: 1;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        #page-transition.hidden {
+            opacity: 0;
+        }
+    </style>
+    <script src="api.js"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div id="page-transition"></div>
+    <div class="mesh-gradient"></div>
+
+    <div
+        class="relative z-10 w-full max-w-[500px] bg-white rounded-[2.5rem] p-8 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] text-center">
+
+        <div class="mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl mb-4">
+                <i class="fa-solid fa-face-viewfinder text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Face ID Verification</h1>
+            <p class="text-slate-500 font-medium mt-2">Position your face within the frame</p>
+        </div>
+
+        <div class="video-container bg-slate-900 aspect-video rounded-3xl mb-8 flex items-center justify-center">
+            <div class="scanner-line"></div>
+
+            <div class="absolute top-4 left-4 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-lg z-30"></div>
+            <div class="absolute top-4 right-4 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-lg z-30"></div>
+            <div class="absolute bottom-4 left-4 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-lg z-30">
+            </div>
+            <div class="absolute bottom-4 right-4 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-lg z-30">
+            </div>
+
+            <video id="video" autoplay muted playsinline class="w-full h-full object-cover rounded-2xl" style="transform:none;"></video>
+
+            <div id="status-overlay"
+                class="absolute inset-0 flex items-center justify-center bg-slate-900/80 z-40 transition-opacity">
+                <p class="text-white font-bold flex items-center gap-3">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Initializing Camera...
+                </p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <button onclick="simulateScan()" id="actionBtn"
+                class="w-full py-4 rounded-2xl bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all active:scale-[0.98]">
+                Start Identity Check
+            </button>
+
+            <button onclick="window.location.href='login.html'"
+                class="text-slate-400 font-bold text-sm uppercase tracking-widest hover:text-slate-600 transition-colors">
+                Cancel & Back
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const statusOverlay = document.getElementById('status-overlay');
+
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                video.style.transform = 'none';
+                statusOverlay.style.opacity = '0';
+                setTimeout(() => statusOverlay.style.display = 'none', 300);
+            } catch (err) {
+                // fallback to any camera, no mirror
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                    video.style.transform = 'none';
+                    statusOverlay.style.opacity = '0';
+                    setTimeout(() => statusOverlay.style.display = 'none', 300);
+                } catch(e) {
+                    statusOverlay.innerHTML = '<p class="text-red-400 font-bold px-6 text-center">Camera Access Denied. Please enable permissions.</p>';
+                }
+            }
+        }
+
+        function simulateScan() {
+            if (!AMS.requireAuth('teacher')) return;
+            const btn = document.getElementById('actionBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Analyzing Biometrics...';
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Identity Confirmed';
+                btn.classList.replace('bg-blue-600', 'bg-emerald-500');
+
+                setTimeout(() => {
+                    window.location.href = 'hub.html';
+                }, 1500);
+            }, 3000);
+        }
+
+        window.addEventListener('load', () => {
+            const overlay = document.getElementById('page-transition');
+            overlay.classList.add('hidden');
+            initCamera();
+        });
+    </script>
+</body>
+
+</html>

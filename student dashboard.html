@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 0% 0%, #0f172a 0%, transparent 40%),
+                radial-gradient(circle at 100% 0%, #134e4a 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, #1e3a8a 0%, transparent 40%);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-nav {
+            width: 280px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed {
+            width: 100px;
+        }
+
+        .sidebar-collapsed span,
+        .sidebar-collapsed .nav-text,
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+
+        .sidebar-collapsed .nav-item {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="flex flex-row min-h-screen">
+    <div class="mesh-gradient"></div>
+
+    <aside id="sidebar" class="sidebar-nav bg-black/40 backdrop-blur-2xl border-r border-white/5 p-8 flex flex-col">
+        <div class="flex items-center gap-4 mb-12 cursor-pointer group" onclick="toggleSidebar()">
+            <div
+                class="w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-400 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-graduation-cap text-slate-900 text-xl"></i>
+            </div>
+            <div class="logo-text">
+                <h1 class="text-xl font-black tracking-tight text-white leading-none">AMS</h1>
+                <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Student Portal</span>
+            </div>
+        </div>
+
+        <nav class="space-y-3 flex-1 text-sm">
+            <a href="student dashboard.html"
+                class="nav-item flex items-center gap-4 text-white bg-gradient-to-r from-teal-500/20 to-transparent p-3 border-l-2 border-teal-500 rounded-r-xl transition-all">
+                <i class="fa-solid fa-chart-pie w-5 text-teal-400"></i>
+                <span class="font-bold nav-text">Dashboard</span>
+            </a>
+
+            <a href="attendence page.html"
+                class="nav-item flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i class="fa-solid fa-clipboard-user w-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold nav-text">Attendance</span>
+            </a>
+
+            <a href="planner.html"
+                class="nav-item flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i class="fa-solid fa-wand-magic-sparkles w-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold nav-text">Planner AI</span>
+            </a>
+
+            <a href="timetable.html"
+                class="nav-item flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i class="fa-solid fa-calendar-days w-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold nav-text">Schedule</span>
+            </a>
+
+            <a href="profile.html"
+                class="nav-item flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i class="fa-solid fa-circle-user w-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold nav-text">Profile</span>
+            </a>
+        </nav>
+
+        <div class="pt-6 border-t border-white/5">
+            <a href="login.html"
+                class="nav-item text-red-400/70 font-bold flex items-center gap-4 p-3 hover:text-red-400 transition-all">
+                <i class="fa-solid fa-sign-out"></i>
+                <span class="text-xs uppercase tracking-widest nav-text">Terminate</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-y-auto h-screen">
+        <header class="p-10 pb-4 flex justify-between items-center">
+            <div>
+                <nav class="text-xs font-bold text-teal-500 uppercase tracking-widest mb-2">Systems Online</nav>
+                <h2 class="text-4xl font-black text-white" id="student-name">Welcome, Student</h2>
+                <p class="text-slate-500 text-sm mt-2" id="student-meta">Loading...</p>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-12 h-12 glass-card rounded-2xl flex items-center justify-center hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-bell text-slate-400"></i>
+                </button>
+
+                <a href="profile.html"
+                    class="glass-card rounded-2xl p-2 px-4 flex items-center gap-4 border-white/10 hover:border-teal-500/50 transition-all">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] font-black text-slate-500 uppercase leading-tight">Neural Status</p>
+                        <p class="text-[10px] font-bold text-emerald-500 flex items-center gap-2 justify-end">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Safe
+                        </p>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-blue-500 flex items-center justify-center font-black text-slate-900 text-sm" id="avatar-initials">--</div>
+                </a>
+            </div>
+        </header>
+
+        <main class="p-6 lg:p-10 space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div onclick="window.location.href='attendence page.html'"
+                    class="cursor-pointer lg:col-span-1 glass-card rounded-[3rem] p-8 flex flex-col items-center justify-center hover:shadow-[0_0_40px_-10px_rgba(20,184,166,0.3)]">
+                    <p class="text-[10px] font-black text-teal-500 uppercase tracking-[0.2em] mb-6">Overall Score</p>
+                    <div class="relative inline-flex items-center justify-center">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="54" stroke="rgba(255,255,255,0.05)" stroke-width="10"
+                                fill="transparent"></circle>
+                            <circle id="progress-circle" cx="64" cy="64" r="54" stroke="#14b8a6" stroke-width="10" fill="transparent"
+                                stroke-dasharray="339.292" stroke-dashoffset="50.89"></circle>
+                        </svg>
+                        <span class="absolute text-3xl font-black text-white" id="overall-pct">--<span class="text-teal-500 text-sm">%</span></span>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div onclick="window.location.href='attendence page.html'"
+                        class="cursor-pointer glass-card rounded-[2.5rem] p-8 flex flex-col justify-center">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Classes
+                        </p>
+                        <h2 class="text-5xl font-black text-white" id="stat-total">--</h2>
+                    </div>
+                    <div onclick="window.location.href='attendence page.html'"
+                        class="cursor-pointer glass-card rounded-[2.5rem] p-8 flex flex-col justify-center border-b-4 border-teal-500/50">
+                        <p class="text-[10px] font-black text-teal-500 uppercase tracking-widest mb-2">Present</p>
+                        <h2 class="text-5xl font-black text-white" id="stat-present">--</h2>
+                    </div>
+                    <div onclick="window.location.href='attendence page.html'"
+                        class="cursor-pointer glass-card rounded-[2.5rem] p-8 flex flex-col justify-center">
+                        <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">Absent</p>
+                        <h2 class="text-5xl font-black text-white" id="stat-absent">--</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-8 glass-card rounded-[3rem] p-10">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-2xl font-black text-white">Daily Protocol</h3>
+                        <a href="timetable.html"
+                            class="px-4 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-slate-400 uppercase hover:text-teal-400 hover:border-teal-500/50 transition-all">View
+                            Full Schedule</a>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div onclick="window.location.href='timetable.html'"
+                            class="group flex items-center justify-between p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:bg-teal-500/10 transition-all cursor-pointer">
+                            <div class="flex items-center gap-6">
+                                <div class="text-center">
+                                    <p class="text-[10px] font-black text-teal-500">09:00</p>
+                                    <p class="text-[10px] font-black text-slate-500 uppercase">AM</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-lg">DBMS Architecture</h4>
+                                    <p class="text-xs text-slate-500">Lab 2 • Prof. Sharma</p>
+                                </div>
+                            </div>
+                            <i
+                                class="fa-solid fa-arrow-right text-slate-700 group-hover:text-teal-500 transition-colors"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 space-y-8">
+                    <div class="glass-card rounded-[3rem] p-8 border-teal-500/20 bg-gradient-to-br from-teal-500/10 to-transparent cursor-pointer"
+                        onclick="window.location.href='planner.html'">
+                        <h3
+                            class="font-black text-white text-sm uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-teal-500"></i> Planner AI
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="p-6 rounded-3xl bg-black/20 border border-white/5">
+                                <p class="text-[10px] text-teal-500 font-black uppercase mb-1">Safe to Bunk</p>
+                                <h4 class="text-3xl font-black text-white" id="stat-bunk">-- <span
+                                        class="text-sm font-bold text-slate-500">Classes</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('sidebar-collapsed');
+        }
+
+        async function loadDashboard() {
+            if (!AMS.requireAuth('student')) return;
+            const user = AMS.getUser();
+
+            try {
+                const data = await AMS.studentDashboard();
+                const att  = data.attendance;
+                const stu  = data.student;
+
+                // Header
+                document.getElementById('student-name').textContent = 'Welcome, ' + stu.name.split(' ')[0];
+                document.getElementById('student-meta').textContent = stu.roll_no + ' • ' + stu.class_name + ' • Section ' + stu.section;
+                document.getElementById('avatar-initials').textContent = stu.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+
+                // Stats
+                document.getElementById('stat-total').textContent   = att.total_classes;
+                document.getElementById('stat-present').textContent = att.present;
+                document.getElementById('stat-absent').textContent  = att.absent;
+                document.getElementById('stat-bunk').textContent    = att.safe_to_bunk;
+
+                // Circular progress
+                const pct = att.percentage;
+                document.getElementById('overall-pct').innerHTML = pct + '<span class="text-teal-500 text-sm">%</span>';
+                const circumference = 339.292;
+                const offset = circumference - (pct / 100) * circumference;
+                document.getElementById('progress-circle').setAttribute('stroke-dashoffset', offset.toFixed(2));
+                document.getElementById('progress-circle').setAttribute('stroke', pct < 75 ? '#ef4444' : '#14b8a6');
+            } catch(e) {
+                console.error('Dashboard load error:', e);
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+
+</html>

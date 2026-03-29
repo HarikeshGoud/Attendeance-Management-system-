@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Analytics Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #1e3a8a;
+            overflow: hidden;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: radial-gradient(at 0% 0%, #1e293b 0, transparent 50%), radial-gradient(at 100% 0%, #2563eb 0, transparent 50%), radial-gradient(at 50% 100%, #1e3a8a 0, transparent 50%);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .app-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .app-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Smooth Accordion Logic */
+        .collapsible-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .active .collapsible-content {
+            max-height: 600px;
+            opacity: 1;
+            padding-bottom: 1.5rem;
+        }
+
+        .active .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Transition Overlay */
+        #page-transition {
+            position: fixed;
+            inset: 0;
+            background: #1e3a8a;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        #page-transition.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Sidebar Slide Logic */
+        aside {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed {
+            width: 5rem !important;
+        }
+
+        .sidebar-collapsed .lg\:block {
+            display: none !important;
+        }
+
+        .nav-link {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen w-screen overflow-hidden">
+    <div id="page-transition"></div>
+    <div class="mesh-gradient"></div>
+
+    <aside id="sidebar"
+        class="w-20 lg:w-64 flex flex-col bg-slate-900/40 backdrop-blur-xl border-r border-white/10 z-50 flex-shrink-0">
+        <div class="p-6">
+            <div id="sidebar-toggle" class="flex items-center gap-3 cursor-pointer group">
+                <div
+                    class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <h1 class="text-xl font-bold text-white hidden lg:block tracking-tight">AMS <span
+                        class="font-light opacity-50">Portal</span></h1>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <a href="hub.html" data-nav
+                class="nav-link flex items-center gap-4 px-4 py-4 text-white/60 hover:text-white hover:bg-white/5 rounded-2xl">
+                <i class="fa-solid fa-layer-group w-5 text-center"></i>
+                <span class="hidden lg:block text-xs uppercase font-bold tracking-wider">Hub</span>
+            </a>
+            <a href="schedule.html" data-nav
+                class="nav-link flex items-center gap-4 px-4 py-4 text-white/60 hover:text-white hover:bg-white/5 rounded-2xl">
+                <i class="fa-solid fa-calendar-check w-5 text-center"></i>
+                <span class="hidden lg:block text-xs uppercase font-bold tracking-wider">Schedule</span>
+            </a>
+            <a href="analytics.html" data-nav
+                class="nav-link flex items-center gap-4 px-4 py-4 text-white/60 hover:text-white hover:bg-white/5 rounded-2xl">
+                <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                <span class="hidden lg:block text-xs uppercase font-bold tracking-wider">Analytics</span>
+            </a>
+            <a href="setting.html" data-nav
+                class="nav-link flex items-center gap-4 px-4 py-4 text-white/60 hover:text-white hover:bg-white/5 rounded-2xl">
+                <i class="fa-solid fa-gear w-5 text-center"></i>
+                <span class="hidden lg:block text-xs uppercase font-bold tracking-wider">Settings</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/10">
+            <a href="LOGIN.html" data-nav
+                class="flex items-center gap-4 px-4 py-4 text-slate-400 hover:bg-red-600 hover:text-white rounded-2xl transition-all group">
+                <i
+                    class="fa-solid fa-right-from-bracket w-5 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 flex items-center justify-between px-8 text-white relative z-40">
+            <div>
+                <h2 class="text-sm font-bold text-blue-400 uppercase tracking-[0.2em]">Intelligence Engine</h2>
+                <p class="text-xs text-white/50">Class Attendance Insights</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="setting.html" data-nav
+                    class="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden ring-2 ring-blue-500/20 hover:ring-blue-400 transition-all">
+                    <img src="https://ui-avatars.com/api/?name=Professor+Smith&background=2563eb&color=fff"
+                        alt="Profile">
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 app-content">
+            <div class="max-w-[1200px] mx-auto space-y-8">
+
+                <div class="space-y-4">
+                    <h3 class="text-white font-bold text-lg px-2 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-blue-400"></i> Class Sessions
+                    </h3>
+                    <div id="sessions-list">
+                        <div class="text-center text-slate-400 py-8">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card rounded-3xl p-6 text-center hover:scale-[1.02] transition-transform">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Avg. Attendance</p>
+                        <h3 class="text-4xl font-black text-blue-600 mt-2" id="avg-att">--%</h3>
+                    </div>
+                    <div class="glass-card rounded-3xl p-6 text-center border-l-4 border-red-500 hover:scale-[1.02] transition-transform">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Total At-Risk</p>
+                        <h3 class="text-4xl font-black text-red-500 mt-2" id="at-risk-count">--</h3>
+                    </div>
+                    <div class="glass-card rounded-3xl p-6 text-center hover:scale-[1.02] transition-transform">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Total Sessions</p>
+                        <h3 class="text-4xl font-black text-slate-800 mt-2" id="total-sessions">--</h3>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        const overlay = document.getElementById('page-transition');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        async function loadTeacherAnalytics() {
+            if (!AMS.requireAuth('teacher')) return;
+            try {
+                const data = await AMS.teacherAnalytics();
+                const stats = data.subject_stats;
+                const atRisk = data.at_risk_students;
+
+                // Update summary cards
+                const avgAtt = stats.length
+                    ? (stats.reduce((s,x) => s + (x.avg_attendance||0), 0) / stats.length).toFixed(1)
+                    : 0;
+                document.getElementById('avg-att').textContent  = avgAtt + '%';
+                document.getElementById('at-risk-count').textContent = atRisk.length;
+                document.getElementById('total-sessions').textContent = stats.reduce((s,x) => s + x.sessions, 0);
+
+                // Render subject accordion
+                const container = document.getElementById('sessions-list');
+                container.innerHTML = stats.map(s => `
+                    <div class="glass-card rounded-3xl overflow-hidden transition-all duration-300 group" onclick="this.classList.toggle('active')">
+                        <div class="p-6 cursor-pointer flex items-center justify-between hover:bg-slate-50 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                                    <i class="fa-solid fa-book"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${s.name}</h4>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">${s.code} &bull; Section ${s.section} &bull; ${s.sessions} sessions</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <span class="text-[10px] font-bold px-2 py-1 rounded-full uppercase ${
+                                    (s.avg_attendance||0) >= 75 ? 'text-emerald-500 bg-emerald-50' : 'text-red-500 bg-red-50'
+                                }">${s.avg_attendance||0}% Present</span>
+                                <i class="fa-solid fa-chevron-down text-slate-300 chevron-icon transition-transform"></i>
+                            </div>
+                        </div>
+                        <div class="collapsible-content px-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 border-t border-slate-100 pt-6">
+                                <div class="bg-slate-50 p-4 rounded-2xl">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">Class Average</p>
+                                    <p class="text-2xl font-black text-slate-800">${s.avg_attendance||0}%</p>
+                                </div>
+                                <div class="bg-red-50 p-4 rounded-2xl border border-red-100">
+                                    <p class="text-[10px] font-bold text-red-400 uppercase">Sessions Taken</p>
+                                    <p class="text-2xl font-black text-red-600">${s.sessions}</p>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-2xl">
+                                    <p class="text-[10px] font-bold text-blue-400 uppercase">Status</p>
+                                    <p class="text-sm font-bold text-blue-700 mt-1">${(s.avg_attendance||0) >= 75 ? 'Good Standing' : 'Needs Attention'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        loadTeacherAnalytics();
+
+        // Sidebar Toggle
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('sidebar-collapsed');
+        });
+
+        // Handle page transitions
+        window.addEventListener('pageshow', function (e) {
+            overlay.style.transition = 'none';
+            overlay.classList.remove('active');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    overlay.style.transition = 'opacity 0.35s ease';
+                });
+            });
+        });
+
+        document.querySelectorAll('a[data-nav]').forEach(link => {
+            link.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (!href || href === '#') return;
+
+                const currentFile = window.location.pathname.split('/').pop();
+                const targetFile = href.split('/').pop();
+
+                if (currentFile === targetFile) {
+                    e.preventDefault();
+                    return;
+                }
+
+                e.preventDefault();
+                overlay.classList.add('active');
+                setTimeout(() => { window.location.href = href; }, 350);
+            });
+        });
+
+        // Highlight Active Link
+        const currentFile = decodeURIComponent(window.location.pathname.split('/').pop()) || 'hub.html';
+        document.querySelectorAll('.nav-link').forEach(link => {
+            const linkFile = decodeURIComponent(link.getAttribute('href')).split('/').pop();
+            if (linkFile === currentFile) {
+                link.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+                link.classList.remove('text-white/60', 'hover:text-white', 'hover:bg-white/5');
+            }
+        });
+    </script>
+</body>
+
+</html>

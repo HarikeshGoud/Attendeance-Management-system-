@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Attendance Records</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family:'Plus Jakarta Sans',sans-serif; background-color:#0f172a; }
+        .mesh-gradient { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-2;
+            background-image:radial-gradient(at 0% 0%,#1e293b 0,transparent 50%),radial-gradient(at 100% 0%,#334155 0,transparent 50%),radial-gradient(at 50% 100%,#020617 0,transparent 50%); }
+        .glass-card { background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.3); box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); }
+        #sidebar { transition:width 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .sidebar-collapsed { width:85px!important; }
+        .sidebar-collapsed .nav-text, .sidebar-collapsed .admin-text { display:none; }
+        .sidebar-collapsed .nav-item { justify-content:center; padding:0.75rem 0; }
+        .main-viewport::-webkit-scrollbar { width:5px; }
+        .main-viewport::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:10px; }
+        .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex">
+<div class="mesh-gradient"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="w-72 hidden lg:flex flex-col border-r border-white/10 h-screen sticky top-0 p-6 z-50 bg-slate-900/20 backdrop-blur-md">
+    <div onclick="toggleSidebar()" class="flex items-center gap-3 mb-12 text-white cursor-pointer group">
+        <div class="w-10 h-10 bg-slate-800 rounded-xl flex-shrink-0 flex items-center justify-center border border-slate-700 group-hover:border-blue-500 transition-colors">
+            <i class="fa-solid fa-shield-halved text-lg"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight admin-text">AMS <span class="font-light opacity-70">Admin</span></h1>
+    </div>
+    <nav class="space-y-1 flex-1">
+        <a href="admin portal.html" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-chart-pie w-5 text-center"></i><span class="nav-text font-semibold">Dashboard</span>
+        </a>
+        <a href="manageuser.html" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-user-group w-5 text-center"></i><span class="nav-text font-semibold">Manage Users</span>
+        </a>
+        <a href="attendancepageadmin.html" class="nav-item flex items-center gap-4 px-4 py-3 text-white bg-white/10 rounded-2xl transition-all">
+            <i class="fa-solid fa-calendar-check w-5 text-center"></i><span class="nav-text font-bold">Attendance</span>
+        </a>
+        <a href="analyticsadmin.html" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+            <i class="fa-solid fa-chart-line w-5 text-center"></i><span class="nav-text font-semibold">Analytics</span>
+        </a>
+    </nav>
+    <div class="pt-6 border-t border-white/10">
+        <button onclick="AMS.logout()" class="nav-item w-full flex items-center gap-4 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-2xl font-bold transition-all">
+            <i class="fa-solid fa-power-off w-5 text-center"></i><span class="nav-text">Logout</span>
+        </button>
+    </div>
+</aside>
+
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header class="h-20 flex items-center justify-between px-8 text-white relative z-50">
+        <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Tracking System</p>
+            <h2 class="text-xl font-bold">Attendance Logs</h2>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 flex items-center gap-3">
+                <i class="fa-solid fa-calendar-days text-blue-400 text-sm"></i>
+                <input type="date" id="date-filter" class="bg-transparent text-xs text-white outline-none cursor-pointer">
+            </div>
+            <select id="subject-filter" class="bg-slate-800/50 border border-slate-700 rounded-xl py-2 px-3 text-xs text-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer">
+                <option value="">All Subjects</option>
+            </select>
+            <button onclick="loadLogs()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i> Filter
+            </button>
+            <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                <i class="fa-solid fa-file-arrow-down"></i> Export
+            </button>
+        </div>
+    </header>
+
+    <main class="main-viewport flex-1 overflow-y-auto p-4 md:p-8 pt-2">
+        <div class="max-w-7xl mx-auto space-y-6">
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-3xl">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Records</p>
+                    <h3 class="text-2xl font-black text-slate-900" id="stat-total">--</h3>
+                </div>
+                <div class="glass-card p-5 rounded-3xl">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Present</p>
+                    <h3 class="text-2xl font-black text-emerald-600" id="stat-present">--</h3>
+                </div>
+                <div class="glass-card p-5 rounded-3xl">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Absent</p>
+                    <h3 class="text-2xl font-black text-red-500" id="stat-absent">--</h3>
+                </div>
+                <div class="glass-card p-5 rounded-3xl bg-blue-600 border-none">
+                    <p class="text-[10px] font-bold text-blue-100 uppercase mb-1">Attendance %</p>
+                    <h3 class="text-2xl font-black text-white" id="stat-pct">--%</h3>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="glass-card rounded-[2.5rem] overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white">
+                            <i class="fa-solid fa-clipboard-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Attendance Feed</h3>
+                            <p class="text-sm text-slate-500 font-medium">All department attendance records</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="search-input" placeholder="Search student..." oninput="filterTable()"
+                            class="bg-slate-100 rounded-xl py-2 pl-10 pr-4 text-xs font-bold focus:outline-none w-48">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-100">
+                                <th class="px-8 py-5 font-bold">Student</th>
+                                <th class="px-8 py-5 font-bold">Roll No</th>
+                                <th class="px-8 py-5 font-bold">Date</th>
+                                <th class="px-8 py-5 font-bold">Subject</th>
+                                <th class="px-8 py-5 font-bold">Status</th>
+                                <th class="px-8 py-5 font-bold">Teacher</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-tbody">
+                            <tr><td colspan="6" class="px-8 py-12 text-center text-slate-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-5 bg-slate-50/80 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-t border-slate-100">
+                    <span id="record-count">0 records</span>
+                    <span class="text-emerald-500">System Synced</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="api.js"></script>
+<script>
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-collapsed'); }
+
+    let allRecords = [];
+
+    async function init() {
+        if (!AMS.requireAuth('admin')) return;
+        document.getElementById('date-filter').value = new Date().toISOString().split('T')[0];
+
+        try {
+            const subjects = await AMS.adminSubjects();
+            const sel = document.getElementById('subject-filter');
+            subjects.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id; opt.textContent = s.name + ' (' + s.code + ')';
+                sel.appendChild(opt);
+            });
+        } catch(e) { console.error(e); }
+
+        loadLogs();
+    }
+
+    async function loadLogs() {
+        try {
+            const date    = document.getElementById('date-filter').value;
+            const subId   = document.getElementById('subject-filter').value;
+            const params  = new URLSearchParams();
+            if (date)  { params.set('date_from', date); params.set('date_to', date); }
+            if (subId) { params.set('subject_id', subId); }
+
+            allRecords = await AMS.adminReport(params.toString() ? '?' + params : '');
+            updateStats();
+            renderTable(allRecords);
+        } catch(e) { console.error(e); }
+    }
+
+    function updateStats() {
+        const present = allRecords.filter(r => r.status === 'present').length;
+        const absent  = allRecords.filter(r => r.status === 'absent').length;
+        const pct     = allRecords.length > 0 ? Math.round(present / allRecords.length * 100) : 0;
+        document.getElementById('stat-total').textContent   = allRecords.length;
+        document.getElementById('stat-present').textContent = present;
+        document.getElementById('stat-absent').textContent  = absent;
+        document.getElementById('stat-pct').textContent     = pct + '%';
+    }
+
+    function renderTable(records) {
+        document.getElementById('record-count').textContent = records.length + ' records';
+        const tbody = document.getElementById('attendance-tbody');
+        if (!records.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-8 py-12 text-center text-slate-400">No records found for selected filters.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = records.map(r => {
+            const initials = r.student_name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+            const sc = r.status === 'present' ? 'emerald' : (r.status === 'late' ? 'amber' : 'red');
+            return `<tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-all record-row" data-name="${r.student_name.toLowerCase()}" data-roll="${r.roll_no.toLowerCase()}">
+                <td class="px-8 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">${initials}</div>
+                        <p class="font-bold text-slate-900">${r.student_name}</p>
+                    </div>
+                </td>
+                <td class="px-8 py-4 font-mono text-xs text-slate-500">${r.roll_no}</td>
+                <td class="px-8 py-4 text-slate-700 text-sm">${r.date}</td>
+                <td class="px-8 py-4 text-slate-500 text-sm">${r.subject_name}</td>
+                <td class="px-8 py-4">
+                    <div class="flex items-center gap-2 text-${sc}-600 font-bold text-sm">
+                        <span class="dot bg-${sc}-500"></span>
+                        ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                    </div>
+                </td>
+                <td class="px-8 py-4 text-slate-500 text-xs">${r.teacher_name}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function filterTable() {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        document.querySelectorAll('.record-row').forEach(row => {
+            row.style.display = (row.dataset.name.includes(q) || row.dataset.roll.includes(q)) ? '' : 'none';
+        });
+    }
+
+    function exportCSV() {
+        if (!allRecords.length) { alert('No records to export.'); return; }
+        const headers = 'Student,Roll No,Date,Subject,Status,Teacher';
+        const rows = allRecords.map(r => `${r.student_name},${r.roll_no},${r.date},${r.subject_name},${r.status},${r.teacher_name}`);
+        const csv = [headers, ...rows].join('\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/csv,' + encodeURIComponent(csv);
+        a.download = 'attendance_report.csv'; a.click();
+    }
+
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+📌 FINAL SYSTEM DESIGN
+Attendance Management System with Role-Based Access & Face Recognition
+1. Project Overview
+
+The Attendance Management System (AMS) is a secure, role-based web application designed for schools and colleges to manage attendance digitally.
+The system replaces manual attendance with an automated, accurate, and secure solution.
+
+The system supports three user roles:
+
+Admin
+
+Teacher
+
+Student
+
+Each role has separate login access, separate dashboards, and strictly controlled permissions.
+Additionally, Face Recognition authentication is implemented for Teachers to ensure that only registered faculty members can access attendance-related features.
+
+2. Core Design Principles
+
+Role-Based Access Control (RBAC)
+
+Clean separation of pages and responsibilities
+
+Secure authentication
+
+Face Recognition for sensitive operations
+
+Real-world college/school workflow
+
+Scalable and industry-ready architecture
+
+3. System Entry Point – Login Page (Common)
+Purpose:
+
+Single authentication gateway for all users.
+
+Login Page Components:
+
+Role Selection:
+
+Admin
+
+Teacher
+
+Student
+
+Username / Email
+
+Password
+
+Login Button
+
+Login Behavior:
+
+User selects a role
+
+User enters credentials
+
+System validates credentials
+
+User is redirected to their role-specific dashboard
+
+Role-Based Redirection:
+
+✅ Admin → Admin Dashboard
+
+✅ Teacher → Face Recognition Page
+
+✅ Student → Student Dashboard
+
+4. Authentication Flow (Complete)
+Login Page
+   ↓
+Role Selection
+   ↓
+Credential Verification
+   ↓
+Role-Based Authorization
+   ↓
+Dashboard Access
+
+
+For Teachers, an additional step is included:
+
+Teacher Login
+   ↓
+Username & Password Verified
+   ↓
+Face Recognition Verification
+   ↓
+Teacher Dashboard
+
+5. Admin Module (Super Controller)
+Role:
+
+Admin manages the entire system but does not mark attendance.
+
+Admin Dashboard Includes:
+
+Total Students Count
+
+Total Teachers Count
+
+Total Classes
+
+Total Subjects
+
+Navigation Menu
+
+Admin Functional Pages (Separate Pages):
+
+Manage Teachers
+
+Add / View / Edit / Delete Teachers
+
+Assign Teacher ID and credentials
+
+Register Teacher Face Data
+
+Capture multiple facial images
+
+Store encoded face data securely
+
+Only Admin can perform this action
+
+Manage Students
+
+Add / View / Edit / Delete Students
+
+Manage Classes
+
+Create classes and sections
+
+Manage Subjects
+
+Add and assign subjects
+
+Assign Teachers
+
+Map teachers to classes and subjects
+
+View Attendance Reports
+
+Class-wise attendance
+
+Subject-wise attendance
+
+Overall statistics
+
+📌 Admin cannot:
+
+Mark attendance
+
+Access teacher-specific pages
+
+6. Teacher Module (Face-Verified Access)
+Access Rule:
+
+Only registered teachers with valid face data can log in.
+
+Teacher Authentication:
+
+Username + Password (Level 1)
+
+Face Recognition (Level 2 – Mandatory)
+
+If face verification fails → Access denied
+
+Teacher Dashboard Includes:
+
+Teacher profile details
+
+Assigned classes
+
+Assigned subjects
+
+Navigation panel
+
+Teacher Functional Pages (Separate Pages):
+
+Create Subject Page
+
+Subject name
+
+Subject code
+
+Assigned class
+
+Create Class Page
+
+Class name
+
+Section
+
+Student list
+
+Mark Attendance Page
+
+Select class
+
+Select subject
+
+Select date
+
+Mark Present / Absent
+
+View Attendance Page
+
+Class-wise attendance
+
+Subject-wise attendance
+
+📌 Teachers cannot:
+
+Access admin controls
+
+Edit other teachers’ data
+
+Register their own face
+
+7. Face Recognition Module (Teacher Only)
+Purpose:
+
+Prevent fake logins
+
+Stop credential sharing
+
+Ensure only real faculty mark attendance
+
+Face Recognition Page Components:
+
+Live webcam feed
+
+Face detection frame
+
+Capture / Verify button
+
+Status message:
+
+“Face Matched – Access Granted”
+
+“Face Not Recognized – Access Denied”
+
+Face Recognition Rules:
+
+Face data is registered only by Admin
+
+Multiple images are stored for accuracy
+
+Face data is securely encoded
+
+Verification occurs only at login
+
+8. Student Module (View-Only Access)
+Student Login Redirects To:
+
+👉 Student Dashboard
+
+Student Dashboard Includes:
+
+Student profile details
+
+Enrolled class and subjects
+
+Student Accessible Pages:
+
+Attendance Percentage Page
+
+Subject-wise attendance %
+
+Overall attendance %
+
+Attendance History Page
+
+Date-wise attendance
+
+Read-only view
+
+📌 Students cannot:
+
+Mark attendance
+
+Edit records
+
+View other students’ data
+
+9. Page Separation (Strict Rule)
+
+Login Page → Separate
+
+Admin Pages → Separate
+
+Teacher Pages → Separate
+
+Student Pages → Separate
+
+Face Recognition Page → Separate
+
+❌ No role overlap
+❌ No permission mixing
+
+10. Attendance Integrity Logic
+
+Attendance can be marked only by face-verified teachers
+
+Attendance sessions are time-based
+
+Attendance data is immutable once submitted
+
+Students can only view their own data
+
+11. High-Level System Architecture
+Frontend
+│
+├── Login Page
+├── Admin Dashboard & Pages
+├── Teacher Dashboard & Pages
+├── Student Dashboard & Pages
+└── Face Recognition Page
+
+Backend
+│
+├── Authentication Service
+├── Face Recognition Engine
+├── Role-Based Access Control
+├── Attendance Service
+└── Database Layer
+
+12. Technology Suggestion (Optional but Professional)
+
+Frontend: HTML, CSS, JavaScript / React
+
+Backend: Python (Flask/Django) or Node.js
+
+Database: MySQL / MongoDB
+
+Face Recognition: OpenCV + Face Encoding
+
+Authentication: JWT / Session-based
+
+13. Final One-Line Summary
+
+This project is a secure, role-based Attendance Management System that uses Face Recognition to authenticate registered teachers, ensures accurate attendance marking, allows students to transparently view their attendance, and gives full administrative control to the institution.

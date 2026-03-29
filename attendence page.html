@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Attendance Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 0% 0%, #0f172a 0%, transparent 40%),
+                radial-gradient(circle at 100% 0%, #134e4a 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, #1e3a8a 0%, transparent 40%);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-nav {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .sidebar-collapsed {
+            width: 80px;
+        }
+
+        .sidebar-nav .collapsible-text {
+            transition: opacity 0.25s ease, width 0.4s ease;
+            opacity: 1;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar-collapsed .collapsible-text {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-content-collapsed {
+            margin-left: 80px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="flex flex-row min-h-screen">
+
+    <div class="mesh-gradient"></div>
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside id="sidebar" class="sidebar-nav bg-black/40 backdrop-blur-2xl border-r border-white/5 flex flex-col py-8">
+
+        <!-- Logo / Toggle -->
+        <button onclick="toggleSidebar()"
+            class="flex items-center gap-4 px-5 mb-12 cursor-pointer group w-full text-left focus:outline-none">
+            <div
+                class="flex-shrink-0 w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-400 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:rotate-12 transition-transform">
+                <i class="fa-solid fa-graduation-cap text-slate-900 text-xl"></i>
+            </div>
+            <div class="collapsible-text">
+                <h1 class="text-xl font-black tracking-tight text-white leading-none">AMS</h1>
+                <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Analytics Engine</span>
+            </div>
+        </button>
+
+        <nav class="space-y-3 flex-1 text-sm px-4">
+            <a href="student dashboard.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Dashboard</span>
+            </a>
+            <!-- Active: Attendance -->
+            <a href="attendence page.html"
+                class="flex items-center gap-4 text-white bg-gradient-to-r from-teal-500/20 to-transparent p-3 border-l-2 border-teal-500 rounded-r-xl transition-all">
+                <i class="fa-solid fa-clipboard-user w-5 flex-shrink-0 text-center text-teal-400"></i>
+                <span class="font-bold collapsible-text">Attendance</span>
+            </a>
+            <a href="planner.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-wand-magic-sparkles w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Planner AI</span>
+            </a>
+            <a href="timetable.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-calendar-days w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Schedule</span>
+            </a>
+            <!-- No hr above Profile -->
+            <a href="profile.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-circle-user w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Profile</span>
+            </a>
+        </nav>
+
+        <div class="pt-6 border-t border-white/5 px-4">
+            <a href="login.html"
+                class="text-red-400/70 font-bold flex items-center gap-4 p-3 hover:text-red-400 transition-all">
+                <i class="fa-solid fa-sign-out w-5 flex-shrink-0 text-center"></i>
+                <span class="text-xs uppercase tracking-widest collapsible-text">Terminate Session</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <div id="mainContent" class="flex-1 flex flex-col overflow-y-auto h-screen main-content">
+
+        <header class="p-10 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <nav class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Detailed Analytics</nav>
+                    <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+                    <div
+                        class="flex items-center gap-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                        <span class="relative flex h-2 w-2">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        Syncing Live
+                    </div>
+                </div>
+                <h2 class="text-4xl font-black text-white">Attendance Report</h2>
+                <p class="text-slate-500 text-sm mt-2">Computer Science & Engineering • Section A</p>
+            </div>
+            <button
+                class="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-3">
+                <i class="fa-solid fa-file-arrow-down text-teal-500"></i>
+                Download Report
+            </button>
+        </header>
+
+        <main class="p-6 lg:p-10 space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="glass-card rounded-[3rem] p-8 flex items-center gap-8 border-l-4 border-l-teal-500">
+                    <div class="w-20 h-20 rounded-2xl bg-teal-500/10 flex items-center justify-center">
+                        <span class="text-2xl font-black text-teal-500" id="att-pct">--%</span>
+                    </div>
+                    <div>
+                        <h4 class="text-slate-500 font-black uppercase text-[10px] tracking-widest mb-1">Health Score
+                        </h4>
+                        <p class="text-2xl font-black text-white" id="att-status">Optimal Status</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-[3rem] p-8">
+                    <h4 class="text-slate-500 font-black uppercase text-[10px] tracking-widest mb-2">Total Lectures</h4>
+                    <p class="text-4xl font-black text-white" id="att-total">-- <span class="text-sm font-bold text-slate-600">UNITS</span></p>
+                </div>
+                <div class="glass-card rounded-[3rem] p-8">
+                    <h4 class="text-slate-500 font-black uppercase text-[10px] tracking-widest mb-2">Verified Present
+                    </h4>
+                    <p class="text-4xl font-black text-teal-500" id="att-present">-- <span class="text-sm font-bold text-slate-600">UNITS</span></p>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-[3rem] p-10">
+                <h3 class="font-black text-3xl text-white tracking-tight mb-8">System Breakdown</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12" id="subjects-grid">
+                    <div class="flex items-center justify-center col-span-2 text-slate-500 py-8">Loading subjects...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+            document.getElementById('mainContent').classList.toggle('main-content-collapsed');
+        }
+
+        async function loadAttendance() {
+            if (!AMS.requireAuth('student')) return;
+            try {
+                const [dash, subjects] = await Promise.all([
+                    AMS.studentDashboard(),
+                    AMS.studentSubjects()
+                ]);
+                const att = dash.attendance;
+
+                document.getElementById('att-pct').textContent   = att.percentage + '%';
+                document.getElementById('att-status').textContent = att.percentage >= 75 ? 'Optimal Status' : 'At Risk';
+                document.getElementById('att-status').className   = att.percentage >= 75 ? 'text-2xl font-black text-white' : 'text-2xl font-black text-red-400';
+                document.getElementById('att-total').innerHTML    = att.total_classes + ' <span class="text-sm font-bold text-slate-600">UNITS</span>';
+                document.getElementById('att-present').innerHTML  = att.present + ' <span class="text-sm font-bold text-slate-600">UNITS</span>';
+
+                const grid = document.getElementById('subjects-grid');
+                grid.innerHTML = subjects.map(s => {
+                    const color = s.percentage >= 75 ? 'teal' : (s.percentage >= 60 ? 'yellow' : 'red');
+                    const hex   = color === 'teal' ? '#14b8a6' : (color === 'yellow' ? '#eab308' : '#ef4444');
+                    return `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end">
+                            <h5 class="font-bold text-white text-base">${s.name}</h5>
+                            <span class="font-black text-xl" style="color:${hex}">${s.percentage}%</span>
+                        </div>
+                        <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full" style="width:${s.percentage}%;background:${hex}"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">${s.code} &bull; ${s.present}/${s.total_classes} classes &bull; <span style="color:${hex}">${s.status.toUpperCase()}</span></p>
+                    </div>`;
+                }).join('');
+            } catch(e) {
+                console.error('Attendance load error:', e);
+            }
+        }
+
+        loadAttendance();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS | Planner AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, transparent 40%),
+                radial-gradient(circle at 100% 0%, #134e4a 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, #1e3a8a 0%, transparent 40%);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 99px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            background: #14b8a6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(20, 184, 166, 0.6);
+            border: 2px solid white;
+            margin-top: -7px;
+            transition: all 0.2s ease;
+        }
+
+        .ai-glow-teal {
+            box-shadow: 0 0 40px -10px rgba(20, 184, 166, 0.2);
+        }
+
+        .ai-glow-blue {
+            box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.2);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar-nav {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .sidebar-collapsed {
+            width: 80px;
+        }
+
+        .sidebar-nav .collapsible-text {
+            transition: opacity 0.25s ease, width 0.4s ease;
+            opacity: 1;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar-collapsed .collapsible-text {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+        }
+
+        /* ── MAIN ── */
+        .main-content {
+            margin-left: 280px;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-content-collapsed {
+            margin-left: 80px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="flex flex-row min-h-screen">
+    <div class="mesh-gradient"></div>
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside id="sidebar" class="sidebar-nav bg-black/40 backdrop-blur-2xl border-r border-white/5 flex flex-col py-8">
+
+        <!-- Logo / Toggle — always visible -->
+        <button onclick="toggleSidebar()"
+            class="flex items-center gap-4 px-5 mb-12 cursor-pointer group w-full text-left focus:outline-none">
+            <div
+                class="flex-shrink-0 w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-400 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:rotate-12 transition-transform">
+                <i class="fa-solid fa-graduation-cap text-slate-900 text-xl"></i>
+            </div>
+            <div class="collapsible-text">
+                <h1 class="text-xl font-black tracking-tight text-white leading-none">AMS</h1>
+                <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Student Portal</span>
+            </div>
+        </button>
+
+        <nav class="space-y-3 flex-1 text-sm px-4">
+            <a href="student dashboard.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-chart-pie w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Dashboard</span>
+            </a>
+            <a href="attendence page.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-clipboard-user w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Attendance</span>
+            </a>
+            <!-- Active: Planner AI -->
+            <a href="planner.html"
+                class="flex items-center gap-4 text-white bg-gradient-to-r from-teal-500/20 to-transparent p-3 border-l-2 border-teal-500 rounded-r-xl transition-all">
+                <i class="fa-solid fa-wand-magic-sparkles w-5 flex-shrink-0 text-center text-teal-400"></i>
+                <span class="font-bold collapsible-text">Planner AI</span>
+            </a>
+            <a href="timetable.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-calendar-days w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Schedule</span>
+            </a>
+            <a href="profile.html"
+                class="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl transition-all group">
+                <i
+                    class="fa-solid fa-circle-user w-5 flex-shrink-0 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-semibold collapsible-text">Profile</span>
+            </a>
+        </nav>
+
+        <div class="pt-6 border-t border-white/5 px-4">
+            <a href="login.html"
+                class="text-red-400/70 font-bold flex items-center gap-4 p-3 hover:text-red-400 transition-all">
+                <i class="fa-solid fa-sign-out w-5 flex-shrink-0 text-center"></i>
+                <span class="text-xs uppercase tracking-widest collapsible-text">Terminate Session</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <div id="mainContent" class="flex-1 flex flex-col overflow-y-auto h-screen main-content">
+
+        <header class="p-10 pb-4 flex justify-between items-start">
+            <div>
+                <nav class="text-xs font-bold text-teal-500 uppercase tracking-widest mb-2">Insights & Analytics</nav>
+                <h2 class="text-4xl font-black text-white">Neural Planner</h2>
+                <p class="text-slate-500 text-sm mt-2">Smart projections based on your current data</p>
+            </div>
+            <a href="profile.html"
+                class="glass-card rounded-2xl p-2 px-4 flex items-center gap-4 border border-white/10 hover:border-teal-500/50 transition-all mt-2">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[10px] font-black text-slate-500 uppercase leading-tight">Neural Status</p>
+                    <p class="text-[10px] font-bold text-emerald-500 flex items-center gap-2 justify-end">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Safe
+                    </p>
+                </div>
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-blue-500 flex items-center justify-center font-black text-slate-900 text-sm">
+                    RH
+                </div>
+            </a>
+        </header>
+
+        <main class="p-6 lg:p-10 space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="glass-card rounded-[3rem] p-10 ai-glow-teal relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-8">
+                            <span
+                                class="px-4 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-[10px] font-bold uppercase">Target:
+                                75%</span>
+                            <i class="fa-solid fa-bullseye text-teal-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-slate-400 font-bold text-sm mb-2">Classes needed</h3>
+                        <div class="flex items-baseline gap-3">
+                            <span id="needed-classes" class="text-7xl font-black text-white">0</span>
+                            <span class="text-xl font-bold text-teal-500">Classes</span>
+                        </div>
+                        <p id="needed-desc" class="mt-6 text-sm text-slate-400 leading-relaxed font-medium"></p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[3rem] p-10 ai-glow-blue relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-8">
+                            <span
+                                class="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase">Bunk
+                                Planner</span>
+                            <i class="fa-solid fa-bed text-blue-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-slate-400 font-bold text-sm mb-2">Safe to miss</h3>
+                        <div class="flex items-baseline gap-3">
+                            <span id="safe-miss" class="text-7xl font-black text-white">0</span>
+                            <span class="text-xl font-bold text-blue-500">Left</span>
+                        </div>
+                        <p id="safe-miss-desc" class="mt-6 text-sm text-slate-400 leading-relaxed font-medium"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-[3.5rem] p-10 lg:p-14 border-t border-white/10">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-16">
+                        <h3 class="text-3xl font-black text-white mb-4">Attendance Predictor</h3>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                        <div class="lg:col-span-7 space-y-10">
+                            <div class="space-y-6">
+                                <div class="flex justify-between items-end">
+                                    <label class="text-xs font-black text-teal-500 uppercase tracking-widest">Attend
+                                        next:</label>
+                                    <div class="text-right leading-none">
+                                        <span id="slider-val" class="text-4xl font-black text-white">20</span>
+                                        <span class="text-xs font-bold text-slate-500 ml-1 uppercase">Classes</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="attend-next-slider" min="0" max="50" value="20">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-6 rounded-3xl bg-white/[0.03] border border-white/5">
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-3">Current Present</p>
+                                    <input type="number" id="input-present" value="121"
+                                        class="bg-transparent text-2xl font-black text-white outline-none w-full">
+                                </div>
+                                <div class="p-6 rounded-3xl bg-white/[0.03] border border-white/5">
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-3">Current Total</p>
+                                    <input type="number" id="input-total" value="142"
+                                        class="bg-transparent text-2xl font-black text-white outline-none w-full">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-5 relative">
+                            <div
+                                class="absolute -inset-1 bg-gradient-to-r from-teal-500 to-blue-600 rounded-[3rem] blur opacity-25">
+                            </div>
+                            <div
+                                class="relative bg-slate-900/90 rounded-[3rem] p-10 border border-white/10 text-center">
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Predicted
+                                    Score</span>
+                                <div class="my-6">
+                                    <span id="predicted-percent"
+                                        class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 leading-none">0.0</span>
+                                    <span class="text-2xl font-black text-teal-500 block mt-2">%</span>
+                                </div>
+                                <div id="increase-badge"
+                                    class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-[10px] font-black uppercase">
+                                    <i id="trend-icon" class="fa-solid fa-arrow-up"></i>
+                                    <span id="diff-val">+0.0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+            document.getElementById('mainContent').classList.toggle('main-content-collapsed');
+        }
+
+        async function loadPlanner() {
+            if (!AMS.requireAuth('student')) return;
+            try {
+                const dash = await AMS.studentDashboard();
+                const att  = dash.attendance;
+                document.getElementById('input-present').value = att.present;
+                document.getElementById('input-total').value   = att.total_classes;
+                calculate();
+            } catch(e) { console.error(e); }
+        }
+        loadPlanner();
+
+        // Planner logic (unchanged)
+        const inputPresent = document.getElementById('input-present');
+        const inputTotal = document.getElementById('input-total');
+        const slider = document.getElementById('attend-next-slider');
+        const sliderVal = document.getElementById('slider-val');
+        const predictedDisplay = document.getElementById('predicted-percent');
+        const diffVal = document.getElementById('diff-val');
+        const badge = document.getElementById('increase-badge');
+        const trendIcon = document.getElementById('trend-icon');
+        const safeMissDisplay = document.getElementById('safe-miss');
+        const safeMissDesc = document.getElementById('safe-miss-desc');
+        const neededClassesDisplay = document.getElementById('needed-classes');
+        const neededDesc = document.getElementById('needed-desc');
+
+        function calculate() {
+            let present = parseInt(inputPresent.value) || 0;
+            let total = parseInt(inputTotal.value) || 0;
+            let next = parseInt(slider.value);
+
+            sliderVal.textContent = next;
+
+            let currentPct = total > 0 ? (present / total) * 100 : 0;
+            let newPct = (total + next) > 0 ? ((present + next) / (total + next)) * 100 : 0;
+
+            predictedDisplay.textContent = newPct.toFixed(1);
+            let diff = newPct - currentPct;
+
+            if (diff >= 0) {
+                badge.className = "inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-5 py-2 rounded-full text-[10px] font-black uppercase";
+                trendIcon.className = "fa-solid fa-arrow-up";
+            } else {
+                badge.className = "inline-flex items-center gap-2 bg-red-500/10 text-red-400 px-5 py-2 rounded-full text-[10px] font-black uppercase";
+                trendIcon.className = "fa-solid fa-arrow-down";
+            }
+            diffVal.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '% Change';
+
+            let safeMiss = Math.floor((present / 0.75) - total);
+            safeMissDisplay.textContent = safeMiss < 0 ? "0" : safeMiss;
+            safeMissDesc.innerHTML = safeMiss < 0
+                ? "You are currently <span class='text-red-400 font-bold'>below 75%</span>."
+                : `You can miss <span class="text-white font-bold">${safeMiss}</span> more classes and stay above 75%.`;
+
+            if (currentPct >= 75) {
+                neededClassesDisplay.textContent = "0";
+                neededDesc.innerHTML = "Status: <span class='text-emerald-400 font-bold'>Safe — you're above 75%</span>";
+            } else {
+                let needed = Math.ceil((0.75 * total - present) / 0.25);
+                neededClassesDisplay.textContent = needed;
+                neededDesc.innerHTML = `Attend <span class="text-white font-bold">${needed}</span> consecutive classes to reach 75%.`;
+            }
+        }
+
+        [inputPresent, inputTotal, slider].forEach(el => el.addEventListener('input', calculate));
+        calculate();
+    </script>
+</body>
+
+</html>
